@@ -31,6 +31,7 @@ const Modal = () => {
   const [trailer, setTrailer] = useState(null);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [movie, setMovie] = useRecoilState(movieState);
+  const [hasTrailer, setHasTrailer] = useState(true);
   const [showModal, setShowModal] = useRecoilState(modalState);
 
   useEffect(() => {
@@ -56,7 +57,13 @@ const Modal = () => {
             video.type === 'Trailer' || video.type === 'Teaser'
         );
 
-        setTrailer(trailer.key);
+        if (trailer) {
+          setTrailer(trailer.key);
+          setHasTrailer(true);
+        } else {
+          setHasTrailer(false);
+          setTrailer(null);
+        }
       }
 
       if (data?.genres) {
@@ -107,14 +114,21 @@ const Modal = () => {
         </button>
 
         <div className="relative pt-[56.25%]">
-          <ReactPlayer
-            playing
-            muted={muted}
-            width="100%"
-            height="100%"
-            style={{ position: 'absolute', top: 0, left: 0 }}
-            url={`https://www.youtube.com/watch?v=${trailer}`}
-          />
+          {hasTrailer ? (
+            <ReactPlayer
+              playing
+              muted={muted}
+              width="100%"
+              height="100%"
+              style={{ position: 'absolute', top: 0, left: 0 }}
+              url={`https://www.youtube.com/watch?v=${trailer}`}
+            />
+          ) : (
+            <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center bg-[#181818]">
+              <h2>Não há trailers no momento.</h2>
+            </div>
+          )}
+
           <div className="absolute bottom-10 flex w-full items-center justify-between px-10">
             <div className="flex space-x-2">
               <button className="flex items-center gap-x-2 rounded bg-white px-6 text-xl font-bold text-black transition hover:bg-[#e6e6e6]">
