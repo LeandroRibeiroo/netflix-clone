@@ -13,6 +13,7 @@ interface Inputs {
 
 const Login = () => {
   const [isLoginScreen, setIsLoginScreen] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -23,9 +24,13 @@ const Login = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async ({ email, password }) => {
     if (isLoginScreen) {
+      setIsSubmitting(true);
       await signIn(email, password);
+      setIsSubmitting(false);
     } else {
-      signUp(email, password);
+      setIsSubmitting(true);
+      await signUp(email, password);
+      setIsSubmitting(false);
     }
   };
 
@@ -91,7 +96,7 @@ const Login = () => {
             type="submit"
             className="w-full rounded bg-[#e50914] py-3 font-semibold"
           >
-            {loading ? (
+            {isSubmitting ? (
               <CircularProgress color="inherit" size={15} />
             ) : (
               'Entrar'
@@ -147,7 +152,7 @@ const Login = () => {
             type="submit"
             className="w-full rounded bg-[#e50914] py-3 font-semibold"
           >
-            {loading ? (
+            {isSubmitting ? (
               <CircularProgress color="inherit" size={15} />
             ) : (
               'Criar conta'
