@@ -20,7 +20,7 @@ const Login = () => {
     formState: { errors },
   } = useForm<Inputs>();
 
-  const { signIn, signUp, loading } = useAuth();
+  const { signIn, signUp } = useAuth();
 
   const onSubmit: SubmitHandler<Inputs> = async ({ email, password }) => {
     if (isLoginScreen) {
