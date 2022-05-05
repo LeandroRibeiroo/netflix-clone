@@ -33,7 +33,7 @@ const Membership = () => {
         hover:bg-gray-200 md:w-4/5"
         >
           {isBillingLoading ? (
-            <CircularProgress color="inherit" />
+            <CircularProgress color="inherit" size={20} />
           ) : (
             'Cancelar assinatura'
           )}
