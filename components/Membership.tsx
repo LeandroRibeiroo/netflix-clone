@@ -1,8 +1,8 @@
+import { CircularProgress } from '@mui/material';
 import { useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import useSubscription from '../hooks/useSubscription';
 import { handleGoToBillingPortal } from '../lib/stripe';
-import Loader from './Loader';
 
 const Membership = () => {
   const { user } = useAuth();
@@ -33,7 +33,7 @@ const Membership = () => {
         hover:bg-gray-200 md:w-4/5"
         >
           {isBillingLoading ? (
-            <Loader color="dark:fill-[#e50914]" />
+            <CircularProgress color="inherit" />
           ) : (
             'Cancelar assinatura'
           )}

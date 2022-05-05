@@ -1,11 +1,11 @@
 import { CheckIcon } from '@heroicons/react/outline';
+import { CircularProgress } from '@mui/material';
 import { Product } from '@stripe/firestore-stripe-payments';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import { loadCheckout } from '../lib/stripe';
-import Loader from './Loader';
 import Table from './Table';
 
 interface Props {
@@ -92,7 +92,7 @@ const Plans = ({ products }: Props) => {
             onClick={handleSubscribe}
           >
             {isBillingLoading ? (
-              <Loader color="dark:fill-gray-300" />
+              <CircularProgress color="inherit" />
             ) : (
               'Continuar'
             )}
