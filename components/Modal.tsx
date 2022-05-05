@@ -1,17 +1,29 @@
 import {
   PlusIcon,
-  ThumbUpIcon,
   VolumeOffIcon,
   VolumeUpIcon,
   XIcon,
 } from '@heroicons/react/outline';
+import { CheckCircleIcon } from '@heroicons/react/solid';
 import MUIModal from '@mui/material/Modal';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  DocumentData,
+  onSnapshot,
+  setDoc,
+} from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { FaPlay } from 'react-icons/fa';
+import { HiOutlineThumbUp, HiThumbUp } from 'react-icons/hi';
 import ReactPlayer from 'react-player/lazy';
 import { useRecoilState } from 'recoil';
 import { modalState, movieState } from '../atoms/modalAtom';
-import { Genre } from '../typing';
+import useAuth from '../hooks/useAuth';
+import { db } from '../lib/firebase';
+import { Genre, Movie } from '../typing';
 
 interface VideoProps {
   id: string;
@@ -30,9 +42,32 @@ const Modal = () => {
   const [muted, setMuted] = useState(true);
   const [trailer, setTrailer] = useState(null);
   const [genres, setGenres] = useState<Genre[]>([]);
-  const [movie, setMovie] = useRecoilState(movieState);
+  const [like, setLike] = useState(false);
   const [hasTrailer, setHasTrailer] = useState(true);
+  const [movie, setMovie] = useRecoilState(movieState);
+  const [addedToList, setAddedToList] = useState(false);
   const [showModal, setShowModal] = useRecoilState(modalState);
+  const [movies, setMovies] = useState<DocumentData[] | Movie[]>([]);
+
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      return onSnapshot(
+        collection(db, 'customers', user.uid, 'myList'),
+        (snapshot) => setMovies(snapshot.docs)
+      );
+    }
+  }, [db, movie?.id]);
+
+  // Check if the movie is already in the user's list
+  useEffect(
+    () =>
+      setAddedToList(
+        movies.findIndex((result) => result.data().id === movie?.id) !== -1
+      ),
+    [movies]
+  );
 
   useEffect(() => {
     if (!movie) return;
@@ -97,6 +132,39 @@ const Modal = () => {
     setShowModal(false);
   };
 
+  const handleAddOrRemoveFavorite = async () => {
+    if (addedToList) {
+      await deleteDoc(
+        doc(db, 'customers', user!.uid, 'myList', movie?.id.toString()!)
+      );
+
+      toast(
+        `${movie?.title || movie?.original_name} foi removido da sua lista.`,
+        {
+          duration: 4000,
+        }
+      );
+    } else {
+      await setDoc(
+        doc(db, 'customers', user!.uid, 'myList', movie?.id.toString()!),
+        {
+          ...movie,
+        }
+      );
+
+      toast(
+        `${movie?.title || movie?.original_name} foi adicionado à sua lista.`,
+        {
+          duration: 4000,
+        }
+      );
+    }
+  };
+
+  const handleLikeMovie = () => {
+    setLike(!like);
+  };
+
   return (
     <MUIModal
       open={showModal}
@@ -105,6 +173,7 @@ const Modal = () => {
       z-50 mx-auto h-[95%] w-full max-w-5xl overflow-hidden overflow-y-scroll rounded-md scrollbar-hide"
     >
       <div>
+        <Toaster position="bottom-center" />
         <button
           className="modalButton absolute right-5 top-5 !z-40 h-9 w-9 border-none bg-[#181818]
           hover:bg-[#181818]"
@@ -135,11 +204,22 @@ const Modal = () => {
                 <FaPlay className="h-7 w-7 text-black" />
                 Play
               </button>
-              <button className="modalButton">
-                <PlusIcon className="h-7 w-7 text-white" />
+              <button
+                className="modalButton"
+                onClick={handleAddOrRemoveFavorite}
+              >
+                {addedToList ? (
+                  <CheckCircleIcon className="h-7 w-7" />
+                ) : (
+                  <PlusIcon className="h-7 w-7 text-white" />
+                )}
               </button>
-              <button className="modalButton">
-                <ThumbUpIcon className="h-7 w-7 text-white" />
+              <button className="modalButton" onClick={handleLikeMovie}>
+                {like ? (
+                  <HiThumbUp className="h-7 w-7 text-white" />
+                ) : (
+                  <HiOutlineThumbUp className="h-7 w-7 text-white" />
+                )}
               </button>
             </div>
             <button className="modalButton" onClick={() => setMuted(!muted)}>

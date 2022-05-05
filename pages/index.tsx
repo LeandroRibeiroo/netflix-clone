@@ -1,13 +1,14 @@
 import { getProducts, Product } from '@stripe/firestore-stripe-payments';
 import Head from 'next/head';
 import { useRecoilValue } from 'recoil';
-import { modalState } from '../atoms/modalAtom';
+import { modalState, movieState } from '../atoms/modalAtom';
 import Banner from '../components/Banner';
 import Header from '../components/Header';
 import Modal from '../components/Modal';
 import Plans from '../components/Plans';
 import Row from '../components/Row';
 import useAuth from '../hooks/useAuth';
+import useList from '../hooks/useList';
 import useSubscription from '../hooks/useSubscription';
 import payments from '../lib/stripe';
 import { Movie } from '../typing';
@@ -39,6 +40,8 @@ const Home = ({
   const { initialLoading, user } = useAuth();
   const showModal = useRecoilValue(modalState);
   const subscription = useSubscription(user);
+  const movie = useRecoilValue(movieState);
+  const list = useList(user?.uid);
 
   if (initialLoading || subscription === null) return null;
 
@@ -57,6 +60,7 @@ const Home = ({
           <Row title="Populares" movies={trendingNow} />
           <Row title="Mais bem avaliados" movies={topRated} />
           <Row title="Ação" movies={actionMovies} />
+          {list.length && <Row title="Minha Lista" movies={list} />}
           <Row title="Comédia" movies={comedyMovies} />
           <Row title="Suspense" movies={horrorMovies} />
           <Row title="Romance" movies={romanceMovies} />
